@@ -14,19 +14,13 @@ import androidx.core.content.ContextCompat;
 
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
-import android.graphics.Canvas;
-import android.graphics.Color;
-import android.graphics.Paint;
-import android.graphics.Rect;
+
 import android.media.Image;
 import android.os.Bundle;
-import android.util.DisplayMetrics;
 import android.util.Log;
 import android.util.Size;
 import android.view.WindowManager;
-import android.widget.FrameLayout;
 import android.widget.ImageView;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.gms.tasks.OnCompleteListener;
@@ -57,9 +51,6 @@ public class MainActivity extends AppCompatActivity {
 
     private ImageView imageView;
 
-    private int[] location;
-
-    private FrameLayout frameLayout;
 
     public static float left, top, bottom, right;
 
@@ -69,39 +60,21 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        location = new int[2];
+        getViews();
 
-        frameLayout = findViewById(R.id.container);
-        frameLayout.getLocationOnScreen(location);
-
-
-        previewView = findViewById(R.id.previewView);
-
-
+        //Start detection clients
         emotionDetector = new EmotionDetector(this);
+        faceDetector = FaceDetection.getClient();
 
-        graphicOverlay = findViewById(R.id.graphic_overlay);
+        //Detecting available cameras
         cameraProviderFuture = ProcessCameraProvider.getInstance(this);
 
+
+        //UI adjustments
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
-
-        //  getSupportActionBar().hide();
-
-        imageView = findViewById(R.id.imageView);
-
-        Canvas canvas = new Canvas();
-        canvas.drawColor(Color.CYAN);
-        Paint p = new Paint();
-// smooths
-        p.setAntiAlias(true);
-        p.setColor(Color.RED);
-        p.setStyle(Paint.Style.STROKE);
-        p.setStrokeWidth(4.5f);
-        canvas.drawRect(20, 10, 30, 30, p);
+        getSupportActionBar().hide();
 
 
-        // Initialize the face detector
-        faceDetector = FaceDetection.getClient();
         startCamera();
     }
 
@@ -146,14 +119,11 @@ public class MainActivity extends AppCompatActivity {
                                                             // ...
                                                             if (faces.size() > 0) {
                                                                 graphicOverlay.clear();
-                                                                Rect detectedFaceBoundingBox = faces.get(0).getBoundingBox();
 
 
                                                                 if (isPortraitMode()) {
                                                                     // Swap width and height sizes when in portrait, since it will be rotated by
                                                                     // 90 degrees. The camera preview and the image being processed have the same size.
-                                                                    graphicOverlay.setImageSourceInfo(imageProxy.getHeight(), imageProxy.getWidth(), true);
-                                                                } else {
                                                                     graphicOverlay.setImageSourceInfo(imageProxy.getHeight(), imageProxy.getWidth(), true);
                                                                 }
 
@@ -163,26 +133,19 @@ public class MainActivity extends AppCompatActivity {
                                                                 }
                                                                 graphicOverlay.postInvalidate();
 
-                                                                DisplayMetrics displayMetrics = new DisplayMetrics();
-                                                                getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
-                                                                int height = displayMetrics.heightPixels;
-                                                                int width = displayMetrics.widthPixels;
 
+                                                                if (left > 0 && top > 0) {
+                                                                    try {
+                                                                        Bitmap croppedFace = Bitmap.createBitmap(previewView.getBitmap(), (int) left, (int) top, 560, 560);
 
-//                                                                Log.e("MAinActivity", "Y coordinate of frame layout" + String.valueOf(location[1]));
-//                                                                Log.e("MainActivity", "Detected Face Left point: " + detectedFaceBoundingBox.left);
-//                                                                Log.e("MainActivity", "Detected Face Top point: " + detectedFaceBoundingBox.top);
+                                                                        Log.e("MainActivity", emotionDetector.predictEmotion(croppedFace));
 
-                                                                Face detectedFace = faces.get(0);
-                                                                int newX = (int) left;
-                                                                int newY = (int) top;
-                                                                int newWidth = detectedFace.getBoundingBox().width();
-                                                                int newHeight = detectedFace.getBoundingBox().height();
-//                                                                Bitmap croppedFace = Bitmap.createBitmap(previewView.getBitmap(), faces.get(0).getBoundingBox().left, faces.get(0).getBoundingBox().bottom*2, detectedFaceBoundingBox.width()*2, detectedFaceBoundingBox.height()*2);
-                                                                if (newX + detectedFaceBoundingBox.width() <= width && newY + detectedFaceBoundingBox.height() <= height && newX > 0 && newY > 0){
-                                                                    Bitmap croppedFace = Bitmap.createBitmap(previewView.getBitmap(), newX, newY, 700, 700);
-                                                                    Log.e("MainActivity", emotionDetector.predictEmotion(croppedFace));
-                                                                    imageView.setImageBitmap(croppedFace);
+                                                                        imageView.setImageBitmap(croppedFace);
+
+                                                                    } catch (
+                                                                            IllegalArgumentException exception) {
+                                                                        Toast.makeText(MainActivity.this, "Please stay within camera limits!", Toast.LENGTH_SHORT).show();
+                                                                    }
                                                                 }
                                                             }
 
@@ -195,7 +158,7 @@ public class MainActivity extends AppCompatActivity {
                                                         public void onFailure(@NonNull Exception e) {
                                                             // Task failed with an exception
                                                             // ...
-                                                            Toast.makeText(MainActivity.this, "Error yad", Toast.LENGTH_SHORT).show();
+                                                            Toast.makeText(MainActivity.this, "Couldn't detect any faces", Toast.LENGTH_SHORT).show();
                                                         }
                                                     }).addOnCompleteListener(new OnCompleteListener<List<Face>>() {
                                                 @Override
@@ -225,5 +188,11 @@ public class MainActivity extends AppCompatActivity {
     private boolean isPortraitMode() {
         return getApplicationContext().getResources().getConfiguration().orientation
                 != Configuration.ORIENTATION_LANDSCAPE;
+    }
+
+    private void getViews() {
+        previewView = findViewById(R.id.previewView);
+        graphicOverlay = findViewById(R.id.graphic_overlay);
+        imageView = findViewById(R.id.imageView);
     }
 }
