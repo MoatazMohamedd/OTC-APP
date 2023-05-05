@@ -12,6 +12,7 @@ import androidx.camera.view.PreviewView;
 import androidx.core.content.ContextCompat;
 
 
+import android.app.Activity;
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
@@ -49,11 +50,11 @@ public class MainActivity extends AppCompatActivity {
     private EmotionDetector emotionDetector;
     private GraphicOverlay graphicOverlay;
     private ImageView imageView;
-    public static float left, top, bottom, right;
+    public static float left, top, bottom, right, width, height;
 
-    private int[] arrayOfEmotionsDetected = new int[10];
+    private int THRESHOLD = 15;
+    private int[] arrayOfEmotionsDetected = new int[THRESHOLD];
     private int emotionCounter =0;
-    private int THRESHOLD = 9;
 //_____________________________________________________________________//
     @ExperimentalGetImage
     @Override
@@ -125,9 +126,9 @@ public class MainActivity extends AppCompatActivity {
                                         //___________________________________________//
                                         graphicOverlay.postInvalidate();
                                         //___________________________________________//
-                                        if (left > 0 && top > 0) {
+                                        if (left > 0 && top > 0 && previewView.getBitmap() != null ) {
                                             try {
-                                                Bitmap croppedFace = Bitmap.createBitmap(previewView.getBitmap(), (int) left, (int) top, 560, 560);
+                                                Bitmap croppedFace = Bitmap.createBitmap(previewView.getBitmap(), (int) left, (int) top, (int) (width), (int) (height));
                                                 imageView.setImageBitmap(croppedFace);
 
                                                 String emotionDetected = emotionDetector.predictEmotion(croppedFace);
@@ -142,14 +143,17 @@ public class MainActivity extends AppCompatActivity {
                                                     if(emotionCounter==THRESHOLD)
                                                     {
                                                         String finalEmotion = emotionDetector.extractOneEmotion(arrayOfEmotionsDetected,THRESHOLD);
-                                                        Log.e("MainActivity", "The Final emotion isssssss : "+finalEmotion);
+                                                        Log.e("MainActivity", "The Final emotion is : "+finalEmotion);
 
                                                         emotionDetector.zerofy(arrayOfEmotionsDetected);
                                                         emotionCounter=0;
 
                                                         Intent intent = new Intent(MainActivity.this, DetectedEmotion.class);
                                                         intent.putExtra("emotion", finalEmotion);
+
                                                         startActivity(intent);
+                                                        Toast.makeText(MainActivity.this, "final emotion is: "+finalEmotion, Toast.LENGTH_SHORT).show();
+
                                                     }
                                                 }
 
@@ -185,7 +189,7 @@ public class MainActivity extends AppCompatActivity {
                     }
                 });
                 //___________________________________________//
-                CameraSelector cameraSelector = new CameraSelector.Builder().requireLensFacing(CameraSelector.LENS_FACING_BACK).build();
+                CameraSelector cameraSelector = new CameraSelector.Builder().requireLensFacing(CameraSelector.LENS_FACING_FRONT).build();
 
                 cameraProvider.unbindAll();
                 //___________________________________________//

@@ -113,6 +113,8 @@ public class FaceGraphic extends GraphicOverlay.Graphic {
         MainActivity.top = top;
         MainActivity.bottom = bottom;
         MainActivity.right = right;
+        MainActivity.width = right-left;
+        MainActivity.height = bottom-top;
 
         // Decide color based on face ID
         int colorID = (face.getTrackingId() == null) ? 0 : Math.abs(face.getTrackingId() % NUM_COLORS);
@@ -162,4 +164,5 @@ public class FaceGraphic extends GraphicOverlay.Graphic {
             yLabelOffset += lineHeight;
         }
     }
+
 }
