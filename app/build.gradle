@@ -7,7 +7,7 @@ android {
 
     defaultConfig {
         applicationId "app.checktdedno.otc"
-        minSdk 26
+        minSdk 29
         targetSdk 33
         versionCode 1
         versionName "1.0"
@@ -38,6 +38,15 @@ dependencies {
     implementation 'org.tensorflow:tensorflow-lite-support:0.1.0'
     implementation 'org.tensorflow:tensorflow-lite-metadata:0.1.0'
     implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
+
+//   implementation project(path: ':unityLibrary')
+  //z implementation project(':launcher')
+
+    implementation "androidx.fragment:fragment:1.5.7"
+
+
+    implementation 'androidx.core:core:1.7.0'
+
 
     def camerax_version = "1.1.0-beta01"
     implementation "androidx.camera:camera-core:${camerax_version}"

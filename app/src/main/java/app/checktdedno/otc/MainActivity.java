@@ -9,11 +9,13 @@ import androidx.camera.core.ImageProxy;
 import androidx.camera.core.Preview;
 import androidx.camera.lifecycle.ProcessCameraProvider;
 import androidx.camera.view.PreviewView;
+import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
 
 import android.app.Activity;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
 
@@ -46,6 +48,10 @@ public class MainActivity extends AppCompatActivity {
     private PreviewView previewView;
     private ImageAnalysis imageAnalysis;
     private ListenableFuture<ProcessCameraProvider> cameraProviderFuture;
+
+    private int REQUEST_CODE_PERMISSIONS = 1001;
+    private final String[] REQUIRED_PERMISSIONS = new String[]{"android.permission.CAMERA"};
+
     private FaceDetector faceDetector;
     private EmotionDetector emotionDetector;
     private GraphicOverlay graphicOverlay;
@@ -54,8 +60,9 @@ public class MainActivity extends AppCompatActivity {
 
     private int THRESHOLD = 15;
     private int[] arrayOfEmotionsDetected = new int[THRESHOLD];
-    private int emotionCounter =0;
-//_____________________________________________________________________//
+    private int emotionCounter = 0;
+
+    //_____________________________________________________________________//
     @ExperimentalGetImage
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -73,9 +80,17 @@ public class MainActivity extends AppCompatActivity {
         //UI adjustments
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
         getSupportActionBar().hide();
+        getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
+
         //___________________________________________//
-        startCamera();
+
+        if(allPermissionsGranted()){
+            startCamera(); //start camera if permission has been granted by user
+        } else{
+            ActivityCompat.requestPermissions(this, REQUIRED_PERMISSIONS, REQUEST_CODE_PERMISSIONS);
+        }
     }
+
     //_____________________________________________________________________//
     @ExperimentalGetImage
     private void startCamera() {
@@ -107,83 +122,81 @@ public class MainActivity extends AppCompatActivity {
                             // Pass image to an ML Kit Vision API
                             // ...
                             Task<List<Face>> result = faceDetector.process(image).addOnSuccessListener(new OnSuccessListener<List<Face>>() {
-                                @Override
-                                public void onSuccess(List<Face> faces) {
-                                    // Task completed successfully
-                                    // ...
-                                    if (faces.size() > 0) {
-                                        graphicOverlay.clear();
-                                        //___________________________________________//
-                                        if (isPortraitMode()) {
-                                            // Swap width and height sizes when in portrait, since it will be rotated by
-                                            // 90 degrees. The camera preview and the image being processed have the same size.
-                                            graphicOverlay.setImageSourceInfo(imageProxy.getHeight(), imageProxy.getWidth(), true);
-                                        }
-                                        //___________________________________________//
-                                        for (Face face : faces) {
-                                            graphicOverlay.add(new FaceGraphic(graphicOverlay, face));
-                                        }
-                                        //___________________________________________//
-                                        graphicOverlay.postInvalidate();
-                                        //___________________________________________//
-                                        if (left > 0 && top > 0 && previewView.getBitmap() != null ) {
-                                            try {
-                                                Bitmap croppedFace = Bitmap.createBitmap(previewView.getBitmap(), (int) left, (int) top, (int) (width), (int) (height));
-                                                imageView.setImageBitmap(croppedFace);
-
-                                                String emotionDetected = emotionDetector.predictEmotion(croppedFace);
-                                                Log.e("MainActivity", emotionDetected);
-
-                                                int isMatch = emotionDetector.findMatch(emotionDetected);
-                                                if(isMatch==1)
-                                                {
-                                                    arrayOfEmotionsDetected[emotionCounter] = emotionDetector.Integerize(emotionDetected);
-                                                    emotionCounter++;
-
-                                                    if(emotionCounter==THRESHOLD)
-                                                    {
-                                                        String finalEmotion = emotionDetector.extractOneEmotion(arrayOfEmotionsDetected,THRESHOLD);
-                                                        Log.e("MainActivity", "The Final emotion is : "+finalEmotion);
-
-                                                        emotionDetector.zerofy(arrayOfEmotionsDetected);
-                                                        emotionCounter=0;
-
-                                                        Intent intent = new Intent(MainActivity.this, DetectedEmotion.class);
-                                                        intent.putExtra("emotion", finalEmotion);
-
-                                                        startActivity(intent);
-                                                        Toast.makeText(MainActivity.this, "final emotion is: "+finalEmotion, Toast.LENGTH_SHORT).show();
-
-                                                    }
+                                        @Override
+                                        public void onSuccess(List<Face> faces) {
+                                            // Task completed successfully
+                                            // ...
+                                            if (faces.size() > 0) {
+                                                graphicOverlay.clear();
+                                                //___________________________________________//
+                                                if (isPortraitMode()) {
+                                                    // Swap width and height sizes when in portrait, since it will be rotated by
+                                                    // 90 degrees. The camera preview and the image being processed have the same size.
+                                                    graphicOverlay.setImageSourceInfo(imageProxy.getHeight(), imageProxy.getWidth(), true);
                                                 }
+                                                //___________________________________________//
+                                                for (Face face : faces) {
+                                                    graphicOverlay.add(new FaceGraphic(graphicOverlay, face));
+                                                }
+                                                //___________________________________________//
+                                                graphicOverlay.postInvalidate();
+                                                //___________________________________________//
+                                                if (left > 0 && top > 0 && previewView.getBitmap() != null) {
+                                                    try {
+                                                        Bitmap croppedFace = Bitmap.createBitmap(previewView.getBitmap(), (int) left, (int) top, (int) (width), (int) (height));
+                                                       // imageView.setImageBitmap(croppedFace);
 
+                                                        String emotionDetected = emotionDetector.predictEmotion(croppedFace);
+                                                        Log.e("MainActivity", emotionDetected);
+
+                                                        int isMatch = emotionDetector.findMatch(emotionDetected);
+                                                        if (isMatch == 1) {
+                                                            arrayOfEmotionsDetected[emotionCounter] = emotionDetector.Integerize(emotionDetected);
+                                                            emotionCounter++;
+
+                                                            if (emotionCounter == THRESHOLD) {
+                                                                String finalEmotion = emotionDetector.extractOneEmotion(arrayOfEmotionsDetected, THRESHOLD);
+                                                                Log.e("MainActivity", "The Final emotion is : " + finalEmotion);
+
+                                                                emotionDetector.zerofy(arrayOfEmotionsDetected);
+                                                                emotionCounter = 0;
+
+                                                                Intent intent = new Intent(MainActivity.this, DetectedEmotion.class);
+                                                                intent.putExtra("emotion", finalEmotion);
+
+                                                                startActivity(intent);
+                                                                Toast.makeText(MainActivity.this, "final emotion is: " + finalEmotion, Toast.LENGTH_SHORT).show();
+                                                                finish();
+
+                                                            }
+                                                        }
+
+                                                    } catch (IllegalArgumentException exception) {
+                                                        Toast.makeText(MainActivity.this, "Please stay within camera limits!", Toast.LENGTH_SHORT).show();
+                                                    }
+                                                    //___________________________________________//
+                                                }
                                             }
-                                            catch (IllegalArgumentException exception) {
-                                                Toast.makeText(MainActivity.this, "Please stay within camera limits!", Toast.LENGTH_SHORT).show();
-                                            }
-                                            //___________________________________________//
+
+
                                         }
-                                    }
-
-
-                                }
-                            })
-                            //___________________________________________//
-                            .addOnFailureListener(new OnFailureListener() {
-                                @Override
-                                public void onFailure(@NonNull Exception e) {
-                                    // Task failed with an exception
-                                    // ...
-                                    Toast.makeText(MainActivity.this, "Couldn't detect any faces", Toast.LENGTH_SHORT).show();
-                                }
-                            })
-                            //___________________________________________//
-                            .addOnCompleteListener(new OnCompleteListener<List<Face>>() {
-                                @Override
-                                public void onComplete(@NonNull Task<List<Face>> task) {
-                                    imageProxy.close();
-                                }
-                            });
+                                    })
+                                    //___________________________________________//
+                                    .addOnFailureListener(new OnFailureListener() {
+                                        @Override
+                                        public void onFailure(@NonNull Exception e) {
+                                            // Task failed with an exception
+                                            // ...
+                                            Toast.makeText(MainActivity.this, "Couldn't detect any faces", Toast.LENGTH_SHORT).show();
+                                        }
+                                    })
+                                    //___________________________________________//
+                                    .addOnCompleteListener(new OnCompleteListener<List<Face>>() {
+                                        @Override
+                                        public void onComplete(@NonNull Task<List<Face>> task) {
+                                            imageProxy.close();
+                                        }
+                                    });
                             //___________________________________________//
                         }
                     }
@@ -203,16 +216,40 @@ public class MainActivity extends AppCompatActivity {
         }, ContextCompat.getMainExecutor(this));
         //___________________________________________//
     }
-    //_____________________________________________________________________//
+
     private boolean isPortraitMode() {
         return getApplicationContext().getResources().getConfiguration().orientation
                 != Configuration.ORIENTATION_LANDSCAPE;
     }
+
     //_____________________________________________________________________//
     private void getViews() {
         previewView = findViewById(R.id.previewView);
         graphicOverlay = findViewById(R.id.graphic_overlay);
         imageView = findViewById(R.id.imageView);
     }
-    //_____________________________________________________________________//
+
+    private boolean allPermissionsGranted(){
+
+        for(String permission : REQUIRED_PERMISSIONS){
+            if(ContextCompat.checkSelfPermission(getApplicationContext(), permission) != PackageManager.PERMISSION_GRANTED){
+                return false;
+            }
+        }
+        return true;
+    }
+    @Override
+    @ExperimentalGetImage
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if (requestCode == REQUEST_CODE_PERMISSIONS) {
+            if (allPermissionsGranted()) {
+                startCamera();
+            } else {
+                Toast.makeText(this, "Permissions not granted by the user.", Toast.LENGTH_SHORT).show();
+                this.finish();
+            }
+        }
+    }
 }

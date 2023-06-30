@@ -14,4 +14,3 @@ dependencyResolutionManagement {
 }
 rootProject.name = "OTC"
 include ':app'
-include ':openCV'
