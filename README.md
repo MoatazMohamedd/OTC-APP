@@ -1,15 +1,15 @@
 # Observing Tutoring Companion (OTC)
 
-**On device facial expression recognition for personalized learning and entertainment**
+**Offline facial expression recognition for personalized learning and entertainment**
 
-OTC is a mobile application that uses machine learning to detect and classify a child’s facial expressions instantly via the selfie camera. Based on the detected mood, it dynamically selects and launches appropriate activities — from educational games to cartoons — creating a more engaging and personalized experience.
+OTC is a mobile application that uses machine learning to detect and classify a child’s facial expressions instantly via the selfie camera. Based on the detected mood, it dynamically selects and launches appropriate activities — from educational games to cartoons — creating a more engaging experience.
 
 > 🎓 **This project was developed as my graduation project at the Faculty of Engineering, Alexandria University.**
 
 ## Features
 
 - **Face Detection Module** — built with Google ML Kit for fast and reliable on-device face detection, fully integrated with Android Studio (Java).
-- **Facial Expression Classification Module** — uses a pre-trained TensorFlow Lite model to classify the child’s mood locally, without sending any data to a server. Runs natively within the Android Java environment.
+- **Facial Expression Classification Module** — uses a pre-trained model to classify the child’s mood locally, without sending any data to a server. Runs natively within the Android Java environment.
 - **Dynamic Content Launcher** — activities and games are built using the Unity game engine and seamlessly integrated into the Android app to launch fun, mood based content dynamically.
 
 ## Prerequisites
@@ -22,16 +22,16 @@ OTC is a mobile application that uses machine learning to detect and classify a 
 1. Clone this repository.
 2. Open the project in Android Studio.
 3. Build and run the project on:
-   - An emulator with a front camera, or
-   - A physical Android device (enable developer mode and USB debugging).
+   - A physical Android device.
+   - An emulator.
 
 ## Usage Flow
 
-1. **Launch the App** — the front-facing camera activates automatically.
+1. **Launch the App** — the front facing camera activates automatically.
 2. **Grant Camera Permission** — the app needs access to the selfie camera.
-3. **Face Detection** — the ML Kit module detects the face in real time.
+3. **Face Detection** — the ML Kit module detects the face in realtime.
 4. **Expression Classification** — TensorFlow Lite classifies the facial expression on device.
-5. **Dynamic Activity** — based on the detected mood, an appropriate Unity-based cartoon, educational game or fun activity launches instantly.
+5. **Dynamic Activity** — based on the detected expression, an appropriate cartoon, educational game or fun activity launches instantly.
 
 ## Screenshots
 
@@ -43,7 +43,7 @@ OTC is a mobile application that uses machine learning to detect and classify a 
 
 ## Note on UI Design
 
-Please note: This project was developed by software engineering students with a primary focus on ML integration, Android development, and game engine interaction. As such, the user interface design may not be production level or highly polished, our goal was to demonstrate technical feasibility and functionality under tight academic deadlines.
+This project was developed by software engineering students with a primary focus on ML integration, Android development and game engine interaction. As such, the user interface design may not be production level or highly polished, our goal was to demonstrate technical abilities and functionality under tight academic deadlines.
 
 ---
 
