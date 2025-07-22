@@ -6,32 +6,24 @@ OTC is a mobile application that uses machine learning to detect and classify a 
 
 > 🎓 **This project was developed as my graduation project at the Faculty of Engineering, Alexandria University.**
 
----
-
 ## Features
 
 - **Face Detection Module** — built with Google ML Kit for fast and reliable on-device face detection, fully integrated with Android Studio (Java).
 - **Facial Expression Classification Module** — uses a pre-trained TensorFlow Lite model to classify the child’s mood locally, without sending any data to a server. Runs natively within the Android Java environment.
 - **Dynamic Content Launcher** — activities and games are built using the Unity game engine and seamlessly integrated into the Android app to launch fun, mood based content dynamically.
 
----
-
-## Getting Started
-
-### Prerequisites
+## Prerequisites
 
 - **Android Studio**
 - A device or emulator with a **front-facing camera**
 
-### Installation
+## Installation
 
 1. Clone this repository.
 2. Open the project in Android Studio.
 3. Build and run the project on:
    - An emulator with a front camera, or
    - A physical Android device (enable developer mode and USB debugging).
-
----
 
 ## Usage Flow
 
@@ -41,13 +33,11 @@ OTC is a mobile application that uses machine learning to detect and classify a 
 4. **Expression Classification** — TensorFlow Lite classifies the facial expression on device.
 5. **Dynamic Activity** — based on the detected mood, an appropriate Unity-based cartoon, educational game or fun activity launches instantly.
 
----
-
 ## Screenshots
 
-| Splash Screen                                  | Loading Screen                                | Character Selection                                     | Educational Game                                    | Fun Game                                    |
-| ---------------------------------------------- | --------------------------------------------- | ------------------------------------------------------- | --------------------------------------------------- | ------------------------------------------- |
-| ![Splash Screen](./screenshots/splash.png.png) | ![Loading Screen](./screenshots/load.png.png) | ![Character Selection](./screenshots/character.png.png) | ![Educational Game](./screenshots/edu_game.png.png) | ![Fun Game](./screenshots/fun_game.png.png) |
+| Splash Screen                              | Loading Screen                            | Character Selection                                 | Educational Game                                | Fun Game                                |
+| ------------------------------------------ | ----------------------------------------- | --------------------------------------------------- | ----------------------------------------------- | --------------------------------------- |
+| ![Splash Screen](./screenshots/splash.png) | ![Loading Screen](./screenshots/load.png) | ![Character Selection](./screenshots/character.png) | ![Educational Game](./screenshots/edu_game.png) | ![Fun Game](./screenshots/fun_game.png) |
 
 ---
 
